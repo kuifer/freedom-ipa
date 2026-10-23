@@ -1,0 +1,54 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile arm64 iOS binary (no signing)
+        run: |
+          set -euo pipefail
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          echo "SDK=$SDK"
+          xcodebuild -version
+          mkdir -p build
+          xcrun -sdk iphoneos swiftc \
+            -sdk "$SDK" \
+            -target arm64-apple-ios14.0 \
+            -O \
+            -o build/Freedom \
+            main.swift
+          file build/Freedom
+
+      - name: Assemble .app bundle
+        run: |
+          set -euo pipefail
+          APP="build/Payload/Freedom.app"
+          mkdir -p "$APP/web"
+          cp build/Freedom "$APP/Freedom"
+          chmod +x "$APP/Freedom"
+          cp Info.plist "$APP/Info.plist"
+          cp index.html "$APP/web/index.html"
+          plutil -lint "$APP/Info.plist"
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          cd build
+          zip -qry ../Freedom-unsigned.ipa Payload
+          cd ..
+          ls -lh Freedom-unsigned.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Freedom-unsigned-ipa
+          path: Freedom-unsigned.ipa
+          if-no-files-found: error
