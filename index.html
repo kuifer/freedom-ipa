@@ -31,12 +31,26 @@
     padding: calc(20 * var(--rpx)) 0 calc(36 * var(--rpx));
     text-align: center;
   }
-  select.gate-title {
-    display: block; width: 100%; padding: 0; margin: 0; border: 0; outline: none;
-    background: transparent; -webkit-appearance: none; appearance: none;
+  .gate-wrap {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(56 * var(--rpx));
+  }
+  .gate-title {
+    display: block; width: 100%; padding: 0; margin: 0;
+    border: 0; outline: none; background: transparent;
     font-family: inherit; font-size: calc(40 * var(--rpx)); font-weight: bold;
     color: #ffffff; letter-spacing: calc(1 * var(--rpx));
-    text-align: center; text-align-last: center;
+    text-align: center; line-height: calc(56 * var(--rpx));
+    white-space: nowrap;
+  }
+  select.gate-hit {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    opacity: 0; -webkit-appearance: none; appearance: none;
+    border: 0; padding: 0; margin: 0; background: transparent;
   }
   .sub-title { display: block; font-size: calc(36 * var(--rpx)); font-weight: bold; color: #ffffff; margin-top: calc(8 * var(--rpx)); }
   .time-box {
@@ -76,7 +90,10 @@
     </div>
 
     <div class="green-section">
-      <select class="gate-title" id="gate"></select>
+      <div class="gate-wrap">
+        <div class="gate-title" id="gateLabel">南區_南大門車道出</div>
+        <select class="gate-hit" id="gate"></select>
+      </div>
       <span class="sub-title">有權限</span>
 
       <div class="time-box">
@@ -122,6 +139,10 @@
     o.textContent = g;
     if (i === 0) { o.selected = true; }
     sel.appendChild(o);
+  });
+
+  sel.addEventListener('change', function () {
+    document.getElementById('gateLabel').textContent = gates[Number(sel.value)] || '';
   });
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
