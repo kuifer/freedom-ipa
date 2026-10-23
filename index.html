@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Freedom</title>
+<style>
+  :root { --rpx: 0.13333333vw; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; background: #f5f5f5; overflow: hidden;
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    -webkit-user-select: none; user-select: none;
+  }
+  .page { background: #f5f5f5; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .card-wrap { width: 100%; background: #ffffff; overflow: hidden; }
+  .border-row {
+    height: calc(36 * var(--rpx));
+    display: flex; align-items: stretch; justify-content: space-between;
+    transform: skewX(-16deg);
+  }
+  .top-border-row { margin-top: calc(14 * var(--rpx)); margin-bottom: calc(18 * var(--rpx)); }
+  .bottom-border-row { position: fixed; left: 0; right: 0; bottom: calc(50 * var(--rpx)); z-index: 2; }
+  .block { flex: 1; height: 100%; border-radius: calc(4 * var(--rpx)); margin: 0 calc(6 * var(--rpx)); }
+  .block.dark { background-color: #28a745; animation: swapDark 0.9s infinite linear; }
+  .block.light { background-color: #b2e8b2; animation: swapLight 0.9s infinite linear; }
+  @keyframes swapDark { 0%, 100% { background-color: #28a745; } 50% { background-color: #b2e8b2; } }
+  @keyframes swapLight { 0%, 100% { background-color: #b2e8b2; } 50% { background-color: #28a745; } }
+  .green-section {
+    background: linear-gradient(180deg, #38b858 0%, #95e095 60%, #ffffff 100%);
+    padding: calc(20 * var(--rpx)) 0 calc(36 * var(--rpx));
+    text-align: center;
+  }
+  select.gate-title {
+    display: block; width: 100%; padding: 0; margin: 0; border: 0; outline: none;
+    background: transparent; -webkit-appearance: none; appearance: none;
+    font-family: inherit; font-size: calc(40 * var(--rpx)); font-weight: bold;
+    color: #ffffff; letter-spacing: calc(1 * var(--rpx));
+    text-align: center; text-align-last: center;
+  }
+  .sub-title { display: block; font-size: calc(36 * var(--rpx)); font-weight: bold; color: #ffffff; margin-top: calc(8 * var(--rpx)); }
+  .time-box {
+    background: #ffffff; margin: calc(8 * var(--rpx)) auto 0;
+    border-radius: calc(20 * var(--rpx));
+    padding: calc(40 * var(--rpx));
+    width: calc(520 * var(--rpx));
+    text-align: center;
+    box-shadow: 0 calc(4 * var(--rpx)) calc(12 * var(--rpx)) rgba(0, 0, 0, 0.06);
+  }
+  .date-text {
+    font-size: calc(52 * var(--rpx)); color: #666666; font-weight: 500;
+    letter-spacing: -1px; line-height: calc(54 * var(--rpx)); margin-bottom: calc(8 * var(--rpx));
+  }
+  .clock-text {
+    font-size: calc(80 * var(--rpx)); font-weight: bold; line-height: calc(82 * var(--rpx)); color: #111111;
+  }
+  .section-divider { height: calc(9 * var(--rpx)); background-color: #f0f0f0; }
+  .photo-area {
+    width: 100%; min-height: calc(520 * var(--rpx)); background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    padding-bottom: calc(100 * var(--rpx));
+  }
+  .photo { width: 100%; display: block; }
+  .photo-placeholder { color: #999999; font-size: calc(32 * var(--rpx)); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="card-wrap">
+    <div class="border-row top-border-row">
+      <div class="block dark"></div><div class="block light"></div>
+      <div class="block dark"></div><div class="block light"></div>
+      <div class="block dark"></div><div class="block light"></div>
+      <div class="block dark"></div><div class="block light"></div>
+      <div class="block dark"></div><div class="block light"></div>
+    </div>
+
+    <div class="green-section">
+      <select class="gate-title" id="gate"></select>
+      <span class="sub-title">有權限</span>
+
+      <div class="time-box">
+        <div class="date-text" id="date"></div>
+        <div class="clock-text" id="clock"></div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="photo-area" id="photoArea">
+      <img class="photo" id="photo" alt="" style="display:none">
+      <div class="photo-placeholder" id="placeholder">點擊上傳照片</div>
+    </div>
+  </div>
+
+  <div class="border-row bottom-border-row">
+    <div class="block dark"></div><div class="block light"></div>
+    <div class="block dark"></div><div class="block light"></div>
+    <div class="block dark"></div><div class="block light"></div>
+    <div class="block dark"></div><div class="block light"></div>
+    <div class="block dark"></div><div class="block light"></div>
+  </div>
+</div>
+
+<script>
+  var gates = [
+    "南區_南大門車道出",
+    "南區_南大門車道進",
+    "南區_西大門車道進",
+    "南區_西大門車道出",
+    "M區_西大門車道進",
+    "M區_西大門車道出",
+    "M區_北大門車道進",
+    "M區_北大門車道出",
+    "A區_北二門車道"
+  ];
+
+  var sel = document.getElementById('gate');
+  gates.forEach(function (g, i) {
+    var o = document.createElement('option');
+    o.value = String(i);
+    o.textContent = g;
+    if (i === 0) { o.selected = true; }
+    sel.appendChild(o);
+  });
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function tick() {
+    var now = new Date();
+    document.getElementById('date').textContent =
+      now.getFullYear() + '/' + pad(now.getMonth() + 1) + '/' + pad(now.getDate());
+    document.getElementById('clock').textContent =
+      pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  document.getElementById('photoArea').addEventListener('click', function () {
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.pick) {
+      window.webkit.messageHandlers.pick.postMessage('');
+    }
+  });
+
+  window.setPhoto = function (src) {
+    var img = document.getElementById('photo');
+    img.src = src;
+    img.style.display = 'block';
+    document.getElementById('placeholder').style.display = 'none';
+  };
+</script>
+</body>
+</html>
